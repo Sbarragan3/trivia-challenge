@@ -42,7 +42,7 @@ muteBtn.addEventListener("click", () => {
   updateMuteButton();
 });
 
-fetch("trivia.json")
+fetch("./trivia.json")
   .then(res => res.json())
   .then(data => {
     triviaData = data;
