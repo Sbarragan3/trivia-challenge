@@ -4,7 +4,7 @@ let currentQuestionIndex = 0;
 let score = 0;
 let timerInterval;
 let timeLeft = 10;
-let isMuted = localStorage.getItem("mute") === "true";
+let isMuted = false;
 let highScore = localStorage.getItem("highScore") || 0;
 
 const yearSelect = document.getElementById("yearSelect");
