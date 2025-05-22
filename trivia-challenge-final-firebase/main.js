@@ -1,14 +1,27 @@
-let triviaData = {};
-let currentQuestions = [];
-let currentQuestionIndex = 0;
-let score = 0;
-let timerInterval;
-let timeLeft = 10;
-let isMuted = localStorage.getItem("mute") === "true";
-let highScore = localStorage.getItem("highScore") || 0;
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, getDocs,
+  query, orderBy, limit
+} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyCBXVwyuOohAlTcbFcwqVmrDlwxgoX2PVA",
+  authDomain: "triviachallenge-8d493.firebaseapp.com",
+  projectId: "triviachallenge-8d493",
+  storageBucket: "triviachallenge-8d493.firebasestorage.app",
+  messagingSenderId: "505265364782",
+  appId: "1:505265364782:web:5942cf1232862b216624bf"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// DOM Elements
 const yearSelect = document.getElementById("yearSelect");
-const topicSelect = document.getElementById("topicSelect");
+const playerNameInput = document.getElementById("playerName");
+const questionCountSelect = document.getElementById("questionCount");
 const startBtn = document.getElementById("startBtn");
 const quiz = document.getElementById("quiz");
 const questionText = document.getElementById("questionText");
@@ -18,59 +31,42 @@ const questionCounter = document.getElementById("questionCounter");
 const timeDisplay = document.getElementById("timeLeft");
 const results = document.getElementById("results");
 const scoreText = document.getElementById("scoreText");
-const muteBtn = document.getElementById("muteBtn");
+const leaderboardEl = document.getElementById("leaderboard");
+const leaderboardList = document.getElementById("leaderboardList");
 
 const tickSound = document.getElementById("tickSound");
 const correctSound = document.getElementById("correctSound");
 const wrongSound = document.getElementById("wrongSound");
-const bgMusic = document.getElementById("bgMusic");
 
+// Settings
 tickSound.volume = 0.3;
 correctSound.volume = 0.8;
 wrongSound.volume = 0.8;
-bgMusic.volume = 0.4;
+let isMuted = false;
+let triviaData = {};
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let score = 0;
+let timerInterval;
+let timeLeft = 10;
+let highScore = localStorage.getItem("highScore") || 0;
 
-function updateMuteButton() {
-  muteBtn.textContent = isMuted ? "🔇 Sound Off" : "🔊 Sound On";
-  if (isMuted) bgMusic.pause();
-  else bgMusic.play();
-}
-
-muteBtn.addEventListener("click", () => {
-  isMuted = !isMuted;
-  localStorage.setItem("mute", isMuted);
-  updateMuteButton();
-});
-
-fetch("trivia.json")
+// Load and populate decades from trivia.json
+fetch("./trivia.json")
   .then(res => res.json())
   .then(data => {
     triviaData = data;
-    populateDropdowns();
-  });
-
-function populateDropdowns() {
-  const decades = Object.keys(triviaData).sort();
-  decades.forEach(decade => {
-    const option = document.createElement("option");
-    option.value = decade;
-    option.textContent = decade;
-    yearSelect.appendChild(option);
-  });
-
-  yearSelect.addEventListener("change", () => {
-    topicSelect.innerHTML = "";
-    const topics = Object.keys(triviaData[yearSelect.value]);
-    topics.forEach(topic => {
+    const decades = Object.keys(triviaData).sort();
+    decades.forEach(decade => {
       const option = document.createElement("option");
-      option.value = topic;
-      option.textContent = topic;
-      topicSelect.appendChild(option);
+      option.value = decade;
+      option.textContent = decade;
+      yearSelect.appendChild(option);
     });
+  })
+  .catch(err => {
+    console.error("Failed to load trivia.json:", err);
   });
-
-  yearSelect.dispatchEvent(new Event("change"));
-}
 
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -80,22 +76,30 @@ function shuffle(array) {
 }
 
 startBtn.addEventListener("click", () => {
+  const name = playerNameInput.value.trim();
+  const count = parseInt(questionCountSelect.value);
   const year = yearSelect.value;
-  const topic = topicSelect.value;
-  currentQuestions = [...triviaData[year][topic]];
+
+  if (!name || !year) {
+    alert("Please enter your name and choose a decade.");
+    return;
+  }
+
+  currentQuestions = [...triviaData[year]];
   shuffle(currentQuestions);
+  currentQuestions = currentQuestions.slice(0, count);
   currentQuestionIndex = 0;
   score = 0;
+
   document.getElementById("setup").classList.add("hidden");
   quiz.classList.remove("hidden");
   feedback.textContent = "";
-  bgMusic.pause();
   showQuestion();
 });
 
 function showQuestion() {
   const q = currentQuestions[currentQuestionIndex];
-  questionCounter.textContent = \`Question \${currentQuestionIndex + 1} of \${currentQuestions.length}\`;
+  questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${currentQuestions.length}`;
   questionText.textContent = q.question;
   optionsDiv.innerHTML = "";
   feedback.textContent = "";
@@ -111,7 +115,7 @@ function showQuestion() {
   const labels = ['A', 'B', 'C', 'D'];
   q.options.forEach((option, index) => {
     const btn = document.createElement("button");
-    btn.textContent = \`\${labels[index]}. \${option}\`;
+    btn.textContent = `${labels[index]}. ${option}`;
     btn.onclick = () => handleAnswer(option, q.answer);
     optionsDiv.appendChild(btn);
   });
@@ -126,14 +130,10 @@ function showQuestion() {
       tickSound.pause();
       tickSound.currentTime = 0;
       if (!isMuted) wrongSound.play();
-      feedback.textContent = \`⏱️ Time's up! Correct answer: \${q.answer}\`;
+      feedback.textContent = `⏱️ Time's up! Correct answer: ${q.answer}`;
       currentQuestionIndex++;
       setTimeout(() => {
-        if (currentQuestionIndex < currentQuestions.length) {
-          showQuestion();
-        } else {
-          showResults();
-        }
+        currentQuestionIndex < currentQuestions.length ? showQuestion() : showResults();
       }, 1000);
     }
   }, 1000);
@@ -143,55 +143,61 @@ function handleAnswer(option, correctAnswer) {
   clearInterval(timerInterval);
   tickSound.pause();
   tickSound.currentTime = 0;
-  const isCorrect = option === correctAnswer;
-  if (isCorrect) {
+  const correct = option === correctAnswer;
+  if (correct) {
     score++;
     feedback.textContent = "✅ Correct!";
     if (!isMuted) correctSound.play();
   } else {
-    feedback.textContent = \`❌ Wrong! Correct answer: \${correctAnswer}\`;
+    feedback.textContent = `❌ Wrong! Correct answer: ${correctAnswer}`;
     if (!isMuted) wrongSound.play();
   }
   currentQuestionIndex++;
   setTimeout(() => {
-    if (currentQuestionIndex < currentQuestions.length) {
-      showQuestion();
-    } else {
-      showResults();
-    }
+    currentQuestionIndex < currentQuestions.length ? showQuestion() : showResults();
   }, 1000);
 }
 
-function showResults() {
+async function showResults() {
   quiz.classList.add("hidden");
   results.classList.remove("hidden");
 
-  let emoji = "🎉";
-  let message = "Well done!";
-  if (score === currentQuestions.length) {
-    emoji = "🏆";
-    message = "Perfect Score!";
-  } else if (score === 0) {
-    emoji = "😬";
-    message = "Oof. Try again!";
-  } else if (score < currentQuestions.length / 2) {
-    emoji = "👍";
-    message = "Not bad, give it another go!";
-  }
+  const name = playerNameInput.value.trim();
+  const emoji = score === currentQuestions.length ? "🏆" : score === 0 ? "😬" : "🎉";
+  const message = score === currentQuestions.length
+    ? "Perfect Score!" : score === 0
+    ? "Oof. Try again!" : score < currentQuestions.length / 2
+    ? "Not bad, give it another go!" : "Well done!";
 
   if (score > highScore) {
     localStorage.setItem("highScore", score);
     highScore = score;
   }
 
-  scoreText.innerHTML = \`<strong>\${emoji} \${message}</strong><br>\${score} / \${currentQuestions.length}<br>🏅 High Score: \${highScore}\`;
+  scoreText.innerHTML = `<strong>${emoji} ${message}</strong><br>${score} / ${currentQuestions.length}<br>🏅 High Score: ${highScore}`;
 
-  if (!isMuted) bgMusic.play();
+  try {
+    await addDoc(collection(db, "leaderboard"), {
+      name,
+      score,
+      date: new Date()
+    });
+  } catch (e) {
+    console.error("Error writing to leaderboard:", e);
+  }
 
-  confetti({
-    particleCount: 150,
-    spread: 70,
-    origin: { y: 0.6 }
+  loadLeaderboard();
+  confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+}
+
+async function loadLeaderboard() {
+  leaderboardEl.classList.remove("hidden");
+  leaderboardList.innerHTML = "";
+  const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10));
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach(doc => {
+    const { name, score } = doc.data();
+    leaderboardList.innerHTML += `<li>${name}: ${score}</li>`;
   });
 }
 
@@ -203,5 +209,3 @@ document.addEventListener("keydown", (e) => {
     if (btn) btn.click();
   }
 });
-
-updateMuteButton();
