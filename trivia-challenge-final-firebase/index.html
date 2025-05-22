@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trivia Challenge</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="assets/favicon.ico" />
+  <meta name="description" content="Choose your name, number of questions, and decade. Climb the leaderboard!">
+</head>
+<body>
+  <div class="game-container">
+    <h1>Trivia Challenge</h1>
+
+    <div id="setup">
+      <label for="playerName">Your Name or Tag:</label>
+      <input type="text" id="playerName" placeholder="e.g. QuizWhiz" required />
+
+      <label for="yearSelect">Decade:</label>
+      <select id="yearSelect"></select>
+
+      <label for="questionCount">Number of Questions:</label>
+      <select id="questionCount">
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+      </select>
+
+      <button id="startBtn">Start Quiz</button>
+    </div>
+
+    <div id="quiz" class="hidden">
+      <p id="questionCounter"></p>
+      <p id="timer">Time left: <span id="timeLeft">10</span> sec</p>
+      <p id="questionText"></p>
+      <div id="options"></div>
+      <p id="feedback"></p>
+    </div>
+
+    <div id="results" class="hidden">
+      <h2>Quiz Complete!</h2>
+      <p id="scoreText"></p>
+      <div id="leaderboard" class="hidden">
+        <h3>Leaderboard</h3>
+        <ul id="leaderboardList"></ul>
+      </div>
+      <button onclick="location.reload()">Play Again</button>
+    </div>
+  </div>
+
+  <audio id="tickSound" src="assets/tick.mp3" loop></audio>
+  <audio id="correctSound" src="assets/correct.mp3"></audio>
+  <audio id="wrongSound" src="assets/wrong.mp3"></audio>
+  <script type="module" src="main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+</body>
+</html>
