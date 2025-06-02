@@ -1,0 +1,1 @@
+// UI behaviors like confetti, emoji feedback, screen updates
