@@ -3,22 +3,6 @@
 // Seafoam + Orange Retro Edition
 
 const storage = {
-  // === Save the latest score ===
-  saveScore(name, score) {
-    const leaderboard = this.getLeaderboard();
-    leaderboard.push({ name, score });
-    leaderboard.sort((a, b) => b.score - a.score); // highest first
-    localStorage.setItem('leaderboard', JSON.stringify(leaderboard.slice(0, 10))); // keep top 10
-    localStorage.setItem('lastScore', score);
-    localStorage.setItem('playerName', name);
-  },
-
-  // === Retrieve leaderboard ===
-  getLeaderboard() {
-    const data = localStorage.getItem('leaderboard');
-    return data ? JSON.parse(data) : [];
-  },
-
   // === Retrieve last score ===
   getLastScore() {
     return Number(localStorage.getItem('lastScore')) || 0;
@@ -27,6 +11,11 @@ const storage = {
   // === Retrieve player name ===
   getPlayerName() {
     return localStorage.getItem('playerName') || 'Player';
+  },
+
+  // === Save player name ===
+  savePlayerName(name) {
+    localStorage.setItem('playerName', name);
   },
 
   // === Save language setting ===

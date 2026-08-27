@@ -1,0 +1,14 @@
+[
+  { "question": "What is the capital of France?", "options": ["Berlin", "Madrid", "Paris", "Rome"], "answer": 2 },
+  { "question": "Which planet is known as the Red Planet?", "options": ["Venus", "Mars", "Jupiter", "Saturn"], "answer": 1 },
+  { "question": "How many continents are there on Earth?", "options": ["5", "6", "7", "8"], "answer": 2 },
+  { "question": "Who wrote 'Romeo and Juliet'?", "options": ["Charles Dickens", "Mark Twain", "William Shakespeare", "Jane Austen"], "answer": 2 },
+  { "question": "What is the largest ocean on Earth?", "options": ["Atlantic", "Indian", "Arctic", "Pacific"], "answer": 3 },
+  { "question": "What gas do plants primarily absorb for photosynthesis?", "options": ["Oxygen", "Carbon dioxide", "Nitrogen", "Hydrogen"], "answer": 1 },
+  { "question": "In what year did the Titanic sink?", "options": ["1905", "1912", "1918", "1923"], "answer": 1 },
+  { "question": "What is the smallest prime number?", "options": ["0", "1", "2", "3"], "answer": 2 },
+  { "question": "Which animal is known as the King of the Jungle?", "options": ["Tiger", "Elephant", "Lion", "Gorilla"], "answer": 2 },
+  { "question": "How many strings does a standard guitar have?", "options": ["4", "5", "6", "7"], "answer": 2 },
+  { "question": "What is the chemical symbol for gold?", "options": ["Go", "Gd", "Au", "Ag"], "answer": 2 },
+  { "question": "Which country is home to the kangaroo?", "options": ["South Africa", "Australia", "Brazil", "India"], "answer": 1 }
+]

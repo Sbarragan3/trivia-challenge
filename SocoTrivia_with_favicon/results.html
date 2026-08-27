@@ -8,8 +8,23 @@
 </head>
 <body>
   <main id="results-container">
-    <!-- Final score, emoji feedback, and confetti go here -->
+    <h1>Game Over!</h1>
+    <p id="score"></p>
+    <p id="message"></p>
+
+    <form id="save-score-form">
+      <input id="player-name" type="text" placeholder="Enter your name" maxlength="20" required />
+      <button type="submit">Save Score</button>
+    </form>
+
+    <div class="button-group">
+      <a href="game.html" class="btn start-btn">Play Again</a>
+      <a href="leaderboard.html" class="btn secondary-btn">View Leaderboard</a>
+    </div>
   </main>
+  <script src="scripts/storage.js"></script>
   <script src="scripts/ui.js"></script>
+  <script src="scripts/api.js"></script>
+  <script src="scripts/results.js"></script>
 </body>
 </html>
