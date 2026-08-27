@@ -43,6 +43,5 @@ class UI {
   }
 }
 
-// Export UI instance
+// Shared UI instance
 const ui = new UI();
-export default ui;

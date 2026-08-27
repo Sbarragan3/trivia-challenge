@@ -1,0 +1,3 @@
+[build]
+  publish = "SocoTrivia_with_favicon"
+  functions = "netlify/functions"
